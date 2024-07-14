@@ -4,24 +4,33 @@
 
 [[anonymous-overview]]
 == Overview
-It is generally considered good security practice to adopt a "`deny-by-default`" stance, where you explicitly specify what is allowed and disallow everything else.
-Defining what is accessible to unauthenticated users is a similar situation, particularly for web applications.
-Many sites require that users must be authenticated for anything other than a few URLs (for example the home and login pages).
-In that case, it is easiest to define access configuration attributes for these specific URLs rather than for every secured resource.
-Put differently, sometimes it is nice to say `ROLE_SOMETHING` is required by default and allow only certain exceptions to this rule, such as for login, logout, and home pages of an application.
-You could also omit these pages from the filter chain entirely, thus bypassing the access control checks, but this may be undesirable for other reasons, particularly if the pages behave differently for authenticated users.
 
-This is what we mean by anonymous authentication.
-Note that there is no real conceptual difference between a user who is "`anonymously authenticated`" and an unauthenticated user.
-Spring Security's anonymous authentication just gives you a more convenient way to configure your access-control attributes.
-Calls to servlet API calls, such as `getCallerPrincipal`, still return null, even though there is actually an anonymous authentication object in the `SecurityContextHolder`.
-
-There are other situations where anonymous authentication is useful, such as when an auditing interceptor queries the `SecurityContextHolder` to identify which principal was responsible for a given operation.
-Classes can be authored more robustly if they know the `SecurityContextHolder` always contains an `Authentication` object and never contains `null`.
-
+* "`deny-by-default`" stance
+    ** 👁️ recommended security practice 👁️
+    ** == explicitly specify what is allowed & disallow everything else
+* for web applications
+    ** if you force authentication for 👁️few URLs 👁️ -> you can define access configuration attributes |
+        *** these specific URLs -- via --
+            **** `ROLE_SOMETHING` by default + certain exceptions to this rule
+            **** omit these pages from the filter chain entirely
+        *** (rather than) | every secured resource
+* anonymous authentication
+    ** "`anonymously authenticated`" user == (conceptually) unauthenticated user
+    ** Spring Security's anonymous authentication
+        *** provides
+            **** convenient way -- to configure -- your access-control attributes
+        *** servlet API calls
+            **** _Example:_ `getCallerPrincipal`
+            **** return null -- even though there is an anonymous authentication object | `SecurityContextHolder`
+    ** uses
+        *** "`anonymously authenticated`" users
+        *** auditing interceptor queries the `SecurityContextHolder` -- to identify -- which principal / responsible for a given operation
+            **** Reason: 🧠 if the classes know that `SecurityContextHolder` always contains an `Authentication` object / never contains `null` -> Classes authored more robustly 🧠
 
 [[anonymous-config]]
 == Configuration
+
+* TODO:
 Anonymous authentication support is provided automatically when you use the HTTP configuration (introduced in Spring Security 3.0).
 You can customize (or disable) it by using the `<anonymous>` element.
 You need not configure the beans described here unless you are using traditional bean configuration.
