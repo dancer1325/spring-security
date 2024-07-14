@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.gargoylesoftware.htmlunit.util.UrlUtils;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -41,6 +40,7 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.htmlunit.util.UrlUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -73,6 +73,8 @@ import org.springframework.security.oauth2.client.registration.TestClientRegistr
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.TestOidcIdTokens;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -198,6 +200,25 @@ public class OidcLogoutConfigurerTests {
 	}
 
 	@Test
+	void logoutWhenRemoteLogoutUriThenUses() throws Exception {
+		this.spring.register(WebServerConfig.class, OidcProviderConfig.class, LogoutUriConfig.class).autowire();
+		String registrationId = this.clientRegistration.getRegistrationId();
+		MockHttpSession one = login();
+		String logoutToken = this.mvc.perform(get("/token/logout/all").session(one))
+			.andExpect(status().isOk())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
+		this.mvc
+			.perform(post(this.web.url("/logout/connect/back-channel/" + registrationId).toString())
+				.param("logout_token", logoutToken))
+			.andExpect(status().isBadRequest())
+			.andExpect(content().string(containsString("partial_logout")))
+			.andExpect(content().string(containsString("not all sessions were terminated")));
+		this.mvc.perform(get("/token/logout").session(one)).andExpect(status().isOk());
+	}
+
+	@Test
 	void logoutWhenRemoteLogoutFailsThenReportsPartialLogout() throws Exception {
 		this.spring.register(WebServerConfig.class, OidcProviderConfig.class, WithBrokenLogoutConfig.class).autowire();
 		LogoutHandler logoutHandler = this.spring.getContext().getBean(LogoutHandler.class);
@@ -305,6 +326,28 @@ public class OidcLogoutConfigurerTests {
 				.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
 				.oauth2Login(Customizer.withDefaults())
 				.oidcLogout((oidc) -> oidc.backChannel(Customizer.withDefaults()));
+			// @formatter:on
+
+			return http.build();
+		}
+
+	}
+
+	@Configuration
+	@EnableWebSecurity
+	@Import(RegistrationConfig.class)
+	static class LogoutUriConfig {
+
+		@Bean
+		@Order(1)
+		SecurityFilterChain filters(HttpSecurity http) throws Exception {
+			// @formatter:off
+			http
+					.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+					.oauth2Login(Customizer.withDefaults())
+					.oidcLogout((oidc) -> oidc
+						.backChannel((backchannel) -> backchannel.logoutUri("http://localhost/wrong"))
+					);
 			// @formatter:on
 
 			return http.build();
@@ -472,8 +515,9 @@ public class OidcLogoutConfigurerTests {
 		String logoutToken(@AuthenticationPrincipal OidcUser user) {
 			OidcLogoutToken token = TestOidcLogoutTokens.withUser(user)
 					.audience(List.of(this.registration.getClientId())).build();
-			JwtEncoderParameters parameters = JwtEncoderParameters
-					.from(JwtClaimsSet.builder().claims((claims) -> claims.putAll(token.getClaims())).build());
+			JwsHeader header = JwsHeader.with(SignatureAlgorithm.RS256).type("logout+jwt").build();
+			JwtClaimsSet claims = JwtClaimsSet.builder().claims((c) -> c.putAll(token.getClaims())).build();
+			JwtEncoderParameters parameters = JwtEncoderParameters.from(header, claims);
 			return this.encoder.encode(parameters).getTokenValue();
 		}
 
@@ -482,8 +526,9 @@ public class OidcLogoutConfigurerTests {
 			OidcLogoutToken token = TestOidcLogoutTokens.withUser(user)
 					.audience(List.of(this.registration.getClientId()))
 					.claims((claims) -> claims.remove(LogoutTokenClaimNames.SID)).build();
-			JwtEncoderParameters parameters = JwtEncoderParameters
-					.from(JwtClaimsSet.builder().claims((claims) -> claims.putAll(token.getClaims())).build());
+			JwsHeader header = JwsHeader.with(SignatureAlgorithm.RS256).type("JWT").build();
+			JwtClaimsSet claims = JwtClaimsSet.builder().claims((c) -> c.putAll(token.getClaims())).build();
+			JwtEncoderParameters parameters = JwtEncoderParameters.from(header, claims);
 			return this.encoder.encode(parameters).getTokenValue();
 		}
 	}

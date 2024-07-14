@@ -2,8 +2,8 @@ name: Trigger Dependabot Auto Merge Forward
 
 on:
   push:
-    branches-ignore:
-      - "dependabot/**"
+    branches:
+      - '*.x'
 
 permissions: read-all
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -142,17 +143,18 @@ public class SpringReactiveOpaqueTokenIntrospector implements ReactiveOpaqueToke
 			.switchIfEmpty(Mono.error(() -> new BadOpaqueTokenException("Provided token isn't active")));
 	}
 
-	private OAuth2TokenIntrospectionClaimAccessor convertClaimsSet(Map<String, Object> claims) {
-		claims.computeIfPresent(OAuth2TokenIntrospectionClaimNames.AUD, (k, v) -> {
+	private ArrayListFromStringClaimAccessor convertClaimsSet(Map<String, Object> claims) {
+		Map<String, Object> converted = new LinkedHashMap<>(claims);
+		converted.computeIfPresent(OAuth2TokenIntrospectionClaimNames.AUD, (k, v) -> {
 			if (v instanceof String) {
 				return Collections.singletonList(v);
 			}
 			return v;
 		});
-		claims.computeIfPresent(OAuth2TokenIntrospectionClaimNames.CLIENT_ID, (k, v) -> v.toString());
-		claims.computeIfPresent(OAuth2TokenIntrospectionClaimNames.EXP,
+		converted.computeIfPresent(OAuth2TokenIntrospectionClaimNames.CLIENT_ID, (k, v) -> v.toString());
+		converted.computeIfPresent(OAuth2TokenIntrospectionClaimNames.EXP,
 				(k, v) -> Instant.ofEpochSecond(((Number) v).longValue()));
-		claims.computeIfPresent(OAuth2TokenIntrospectionClaimNames.IAT,
+		converted.computeIfPresent(OAuth2TokenIntrospectionClaimNames.IAT,
 				(k, v) -> Instant.ofEpochSecond(((Number) v).longValue()));
 		// RFC-7662 page 7 directs users to RFC-7519 for defining the values of these
 		// issuer fields.
@@ -172,12 +174,12 @@ public class SpringReactiveOpaqueTokenIntrospector implements ReactiveOpaqueToke
 		// may be awkward to debug, we do not want to manipulate this value. Previous
 		// versions of Spring Security
 		// would *only* allow valid URLs, which is not what we wish to achieve here.
-		claims.computeIfPresent(OAuth2TokenIntrospectionClaimNames.ISS, (k, v) -> v.toString());
-		claims.computeIfPresent(OAuth2TokenIntrospectionClaimNames.NBF,
+		converted.computeIfPresent(OAuth2TokenIntrospectionClaimNames.ISS, (k, v) -> v.toString());
+		converted.computeIfPresent(OAuth2TokenIntrospectionClaimNames.NBF,
 				(k, v) -> Instant.ofEpochSecond(((Number) v).longValue()));
-		claims.computeIfPresent(OAuth2TokenIntrospectionClaimNames.SCOPE,
+		converted.computeIfPresent(OAuth2TokenIntrospectionClaimNames.SCOPE,
 				(k, v) -> (v instanceof String s) ? new ArrayListFromString(s.split(" ")) : v);
-		return () -> claims;
+		return () -> converted;
 	}
 
 	private OAuth2IntrospectionException onError(Throwable ex) {
@@ -225,6 +227,20 @@ public class SpringReactiveOpaqueTokenIntrospector implements ReactiveOpaqueToke
 
 		ArrayListFromString(String... elements) {
 			super(Arrays.asList(elements));
+		}
+
+	}
+
+	// gh-15165
+	private interface ArrayListFromStringClaimAccessor extends OAuth2TokenIntrospectionClaimAccessor {
+
+		@Override
+		default List<String> getScopes() {
+			Object value = getClaims().get(OAuth2TokenIntrospectionClaimNames.SCOPE);
+			if (value instanceof ArrayListFromString list) {
+				return list;
+			}
+			return OAuth2TokenIntrospectionClaimAccessor.super.getScopes();
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.gargoylesoftware.htmlunit.util.UrlUtils;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -40,6 +39,7 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.htmlunit.util.UrlUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import reactor.core.publisher.Mono;
@@ -243,6 +243,32 @@ public class OidcLogoutSpecTests {
 	}
 
 	@Test
+	void logoutWhenRemoteLogoutUriThenUses() {
+		this.spring.register(WebServerConfig.class, OidcProviderConfig.class, LogoutUriConfig.class).autowire();
+		String registrationId = this.clientRegistration.getRegistrationId();
+		String one = login();
+		String logoutToken = this.test.get()
+			.uri("/token/logout/all")
+			.cookie("SESSION", one)
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.returnResult(String.class)
+			.getResponseBody()
+			.blockFirst();
+		this.test.post()
+			.uri(this.web.url("/logout/connect/back-channel/" + registrationId).toString())
+			.body(BodyInserters.fromFormData("logout_token", logoutToken))
+			.exchange()
+			.expectStatus()
+			.isBadRequest()
+			.expectBody(String.class)
+			.value(containsString("partial_logout"))
+			.value(containsString("not all sessions were terminated"));
+		this.test.get().uri("/token/logout").cookie("SESSION", one).exchange().expectStatus().isOk();
+	}
+
+	@Test
 	void logoutWhenRemoteLogoutFailsThenReportsPartialLogout() {
 		this.spring.register(WebServerConfig.class, OidcProviderConfig.class, WithBrokenLogoutConfig.class).autowire();
 		ServerLogoutHandler logoutHandler = this.spring.getContext().getBean(ServerLogoutHandler.class);
@@ -389,6 +415,28 @@ public class OidcLogoutSpecTests {
 					.authorizeExchange((authorize) -> authorize.anyExchange().authenticated())
 					.oauth2Login(Customizer.withDefaults())
 					.oidcLogout((oidc) -> oidc.backChannel(Customizer.withDefaults()));
+			// @formatter:on
+
+			return http.build();
+		}
+
+	}
+
+	@Configuration
+	@EnableWebFluxSecurity
+	@Import(RegistrationConfig.class)
+	static class LogoutUriConfig {
+
+		@Bean
+		@Order(1)
+		SecurityWebFilterChain filters(ServerHttpSecurity http) throws Exception {
+			// @formatter:off
+			http
+					.authorizeExchange((authorize) -> authorize.anyExchange().authenticated())
+					.oauth2Login(Customizer.withDefaults())
+					.oidcLogout((oidc) -> oidc
+						.backChannel((backchannel) -> backchannel.logoutUri("http://localhost/wrong"))
+					);
 			// @formatter:on
 
 			return http.build();
