@@ -45,6 +45,22 @@
 image::{figures}/securitycontextholder.png[]
 
 * := place | Spring Security stores the details of who is xref:features/authentication/index.adoc#authentication[authenticated]
+    ** 👁️ `ThreadLocal` is used by default to store 👁️
+        *** == `SecurityContextHolder.MODE_THREADLOCAL` strategy
+        *** -> 👁️`SecurityContext` is ALWAYS available to methods | same thread 👁️
+            **** independently if you do NOT pass the `SecurityContext` as an argument
+        *** after the present principal's request is processed -> take care to clear the thread
+            **** Spring Security's xref:servlet/architecture.adoc#servlet-filterchainproxy[FilterChainProxy] -- ensures that -- `SecurityContext` is always cleared
+        *** ⚠️Some applications are NOT suitable for using a `ThreadLocal`  ⚠️
+            **** Reason: 🧠 specific way to work with threads 🧠
+        *** way to change it
+            **** set a system property
+            **** -- call to a -- static method | `SecurityContextHolder`
+    ** you can configure a strategy | startup
+        *** allows
+            **** specifying how to store the context
+        *** if standalone application -> use `SecurityContextHolder.MODE_GLOBAL` strategy
+        *** if you want applications / threads -- spawned by the -- secure thread  -> use `SecurityContextHolder.MODE_INHERITABLETHREADLOCAL` strategy
     ** ⚠️Spring Security does NOT care how the `SecurityContextHolder` is populated ⚠️
         *** if it contains a value -> it's used as the currently authenticated user
     ** 👁️contains the <<servlet-authentication-securitycontext>> 👁️
@@ -106,26 +122,6 @@ val principal = authentication.principal
 val authorities = authentication.authorities
 ----
 ======
-
-* TODO:
-
-// FIXME: Add links to and relevant description of HttpServletRequest.getRemoteUser() and @CurrentSecurityContext @AuthenticationPrincipal
-
-By default, `SecurityContextHolder` uses a `ThreadLocal` to store these details, which means that the `SecurityContext` is always available to methods in the same thread, even if the `SecurityContext` is not explicitly passed around as an argument to those methods.
-Using a `ThreadLocal` in this way is quite safe if you take care to clear the thread after the present principal's request is processed.
-Spring Security's xref:servlet/architecture.adoc#servlet-filterchainproxy[FilterChainProxy] ensures that the `SecurityContext` is always cleared.
-
-Some applications are not entirely suitable for using a `ThreadLocal`, because of the specific way they work with threads.
-For example, a Swing client might want all threads in a Java Virtual Machine to use the same security context.
-You can configure `SecurityContextHolder` with a strategy on startup to specify how you would like the context to be stored.
-For a standalone application, you would use the `SecurityContextHolder.MODE_GLOBAL` strategy.
-Other applications might want to have threads spawned by the secure thread also assume the same security identity.
-You can achieve this by using `SecurityContextHolder.MODE_INHERITABLETHREADLOCAL`.
-You can change the mode from the default `SecurityContextHolder.MODE_THREADLOCAL` in two ways.
-The first is to set a system property.
-The second is to call a static method on `SecurityContextHolder`.
-Most applications need not change from the default.
-However, if you do, take a look at the JavaDoc for `SecurityContextHolder` to learn more.
 
 [[servlet-authentication-securitycontext]]
 == SecurityContext
