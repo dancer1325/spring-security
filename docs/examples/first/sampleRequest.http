@@ -1,0 +1,7 @@
+### GET -- NOT authenticated
+GET {{host}}current
+
+### GET - Authenticated
+GET {{host}}current
+Authorization: Basic username password
+// TODO: Why is it NOT comprehend an authenticated user?
