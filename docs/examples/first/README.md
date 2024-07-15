@@ -2,6 +2,7 @@
 * Simplest way to indicate a user is authenticated
   * == set directly
 * Way to get current authenticated principal
+* Order of `Filter` | `FilterChain` is important -- TODO: Implement --
 
 ## How to run locally?
 * `mvn springboot:run`

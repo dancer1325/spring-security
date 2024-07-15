@@ -2,30 +2,35 @@
 = Architecture
 :figures: servlet/architecture
 
-This section discusses Spring Security's high-level architecture within Servlet based applications.
-We build on this high-level understanding within the xref:servlet/authentication/index.adoc#servlet-authentication[Authentication], xref:servlet/authorization/index.adoc#servlet-authorization[Authorization], and xref:servlet/exploits/index.adoc#servlet-exploits[Protection Against Exploits] sections of the reference.
+* Goal
+    ** Spring Security's high-level architecture | 👁️Servlet-based applications 👁️
+        *** base for comprehend
+            **** xref:servlet/authentication/index.adoc#servlet-authentication[Authentication]
+            **** xref:servlet/authorization/index.adoc#servlet-authorization[Authorization]
+            **** xref:servlet/exploits/index.adoc#servlet-exploits[Protection Against Exploits]
+
 // FIXME: Add links to other sections of architecture
 
 [[servlet-filters-review]]
-== A Review of Filters
+== Review of Filters
 
-Spring Security's Servlet support is based on Servlet Filters, so it is helpful to look at the role of Filters generally first.
-The following image shows the typical layering of the handlers for a single HTTP request.
+* Servlet Filters
+    ** ⭐ base for Spring Security's Servlet ⭐
+* typical layering of the handlers / single HTTP request
+    ** client -- sends a request to the -- application
+    ** container -- creates a -- `FilterChain` /
+        *** contains
+            **** `Filter` instances
+            **** `Servlet` /
+                ***** -- process, based on the request URI, the -- `HttpServletRequest`
+                *****  if it's a Spring MVC application -> `Servlet` is an instance of {spring-framework-reference-url}web.html#mvc-servlet[`DispatcherServlet`]
+        *** 👁️order of each `Filter` is extremely important 👁️
+            **** Reason: 🧠 `Filter` impacts ONLY downstream `Filter` instances and the `Servlet` 🧠
+            **** _Example:_ Check 'examples/first'
 
 .FilterChain
 [[servlet-filterchain-figure]]
 image::{figures}/filterchain.png[]
-
-The client sends a request to the application, and the container creates a `FilterChain`, which contains the `Filter` instances and `Servlet` that should process the `HttpServletRequest`, based on the path of the request URI.
-In a Spring MVC application, the `Servlet` is an instance of {spring-framework-reference-url}web.html#mvc-servlet[`DispatcherServlet`].
-At most, one `Servlet` can handle a single `HttpServletRequest` and `HttpServletResponse`.
-However, more than one `Filter` can be used to:
-
-* Prevent downstream `Filter` instances or the `Servlet` from being invoked.
-In this case, the `Filter` typically writes the `HttpServletResponse`.
-* Modify the `HttpServletRequest` or `HttpServletResponse` used by the downstream `Filter` instances and the `Servlet`.
-
-The power of the `Filter` comes from the `FilterChain` that is passed into it.
 
 .`FilterChain` Usage Example
 [tabs]
@@ -53,7 +58,14 @@ fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterCh
 ----
 ======
 
-Since a `Filter` impacts only downstream `Filter` instances and the `Servlet`, the order in which each `Filter` is invoked is extremely important.
+* / 1! `HttpServletRequest` and `HttpServletResponse`
+    ** 1! `Servlet` can handle it
+    ** >= 1 `Filter`can be used to
+        *** prevent invoke
+            **** downstream `Filter` instances or
+            **** `Servlet`
+        *** modify the `HttpServletRequest` or `HttpServletResponse`
+
 
 [[servlet-delegatingfilterproxy]]
 == DelegatingFilterProxy
