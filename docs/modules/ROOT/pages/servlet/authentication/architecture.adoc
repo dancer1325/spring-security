@@ -126,8 +126,9 @@ val authorities = authentication.authorities
 [[servlet-authentication-securitycontext]]
 == SecurityContext
 
-The javadoc:org.springframework.security.core.context.SecurityContext[] is obtained from the <<servlet-authentication-securitycontextholder>>.
-The `SecurityContext` contains an <<servlet-authentication-authentication>> object.
+* Check javadoc:org.springframework.security.core.context.SecurityContext[]
+* -- obtained from the -- <<servlet-authentication-securitycontextholder>>
+* contains an <<servlet-authentication-authentication>> object
 
 [[servlet-authentication-authentication]]
 == Authentication
