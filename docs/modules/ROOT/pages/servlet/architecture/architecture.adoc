@@ -162,17 +162,20 @@ image::{figures}/securityfilterchain.png[]
 [[servlet-multi-securityfilterchain-figure]]
 image::{figures}/multi-securityfilterchain.png[]
 
-
 [[servlet-security-filters]]
 == Security Filters
 
-The Security Filters are inserted into the <<servlet-filterchainproxy>> with the <<servlet-securityfilterchain>> API.
-Those filters can be used for a number of different purposes, like xref:servlet/authentication/index.adoc[authentication], xref:servlet/authorization/index.adoc[authorization], xref:servlet/exploits/index.adoc[exploit protection], and more.
-The filters are executed in a specific order to guarantee that they are invoked at the right time, for example, the `Filter` that performs authentication should be invoked before the `Filter` that performs authorization.
-It is typically not necessary to know the ordering of Spring Security's ``Filter``s.
-However, there are times that it is beneficial to know the ordering, if you want to know them, you can check the {gh-url}/config/src/main/java/org/springframework/security/config/annotation/web/builders/FilterOrderRegistration.java[`FilterOrderRegistration` code].
-
-To exemplify the above paragraph, let's consider the following security configuration:
+* + <<servlet-securityfilterchain>> API -- inserted into -- <<servlet-filterchainproxy>>
+    ** uses
+        *** xref:servlet/authentication/index.adoc[authentication]
+        *** xref:servlet/authorization/index.adoc[authorization]
+        *** xref:servlet/exploits/index.adoc[exploit protection]
+* are executed in specific order
+    **  ⚠️≠ from top to bottom ⚠️
+    ** (normally) NOT necessary to know the order
+    ** check {gh-url}/config/src/main/java/org/springframework/security/config/annotation/web/builders/FilterOrderRegistration.java[`FilterOrderRegistration` code]
+        *** _Example:_ ..., authentication `Filter` , ..., authorization`Filter`, ...
+* _Example:_ Check 'examples/first'
 
 [tabs]
 ======
@@ -250,10 +253,13 @@ If you want to see the list of filters invoked for a particular request, you can
 [[servlet-print-filters]]
 === Printing the Security Filters
 
-Often times, it is useful to see the list of security ``Filter``s that are invoked for a particular request.
-For example, you want to make sure that the <<adding-custom-filter,filter you have added>> is in the list of the security filters.
+* print the security `Filters`  list
+    **
+    ** invoked / request
+        *** uses
+            **** check that <<adding-custom-filter,filter you have added>> is in the list of the security filters
 
-The list of filters is printed at DEBUG level on the application startup, so you can see something like the following on the console output for example:
+at DEBUG level on the application startup
 
 [source,text,role="terminal"]
 ----
@@ -280,6 +286,8 @@ And that will give a pretty good idea of the security filters that are configure
 But that is not all, you can also configure your application to print the invocation of each individual filter for each request.
 That is helpful to see if the filter you have added is invoked for a particular request or to check where an exception is coming from.
 To do that, you can configure your application to <<servlet-logging,log the security events>>.
+
+* _Example:_ Check 'examples/first'
 
 [[adding-custom-filter]]
 === Adding a Custom Filter to the Filter Chain
@@ -525,48 +533,23 @@ The javadoc:org.springframework.security.web.savedrequest.RequestCacheAwareFilte
 [[servlet-logging]]
 == Logging
 
-Spring Security provides comprehensive logging of all security related events at the DEBUG and TRACE level.
-This can be very useful when debugging your application because for security measures Spring Security does not add any detail of why a request has been rejected to the response body.
-If you come across a 401 or 403 error, it is very likely that you will find a log message that will help you understand what is going on.
+* about ALL security related events | DEBUG and TRACE level
+    ** uses
+        *** debug your application
+            **** Reason: 🧠 by default, Spring Security does NOT add any detail to the response body, about why a request has been rejected 🧠
+* ways to configure it
+    ** .application.properties | Spring Boot
 
-Let's consider an example where a user tries to make a `POST` request to a resource that has xref:servlet/exploits/csrf.adoc[CSRF protection] enabled without the CSRF token.
-With no logs, the user will see a 403 error with no explanation of why the request was rejected.
-However, if you enable logging for Spring Security, you will see a log message like this:
+        logging.level.org.springframework.security=TRACE
 
-[source,text]
-----
-2023-06-14T09:44:25.797-03:00 DEBUG 76975 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /hello
-2023-06-14T09:44:25.797-03:00 TRACE 76975 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Invoking DisableEncodeUrlFilter (1/15)
-2023-06-14T09:44:25.798-03:00 TRACE 76975 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Invoking WebAsyncManagerIntegrationFilter (2/15)
-2023-06-14T09:44:25.800-03:00 TRACE 76975 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Invoking SecurityContextHolderFilter (3/15)
-2023-06-14T09:44:25.801-03:00 TRACE 76975 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Invoking HeaderWriterFilter (4/15)
-2023-06-14T09:44:25.802-03:00 TRACE 76975 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Invoking CsrfFilter (5/15)
-2023-06-14T09:44:25.814-03:00 DEBUG 76975 --- [nio-8080-exec-1] o.s.security.web.csrf.CsrfFilter         : Invalid CSRF token found for http://localhost:8080/hello
-2023-06-14T09:44:25.814-03:00 DEBUG 76975 --- [nio-8080-exec-1] o.s.s.w.access.AccessDeniedHandlerImpl   : Responding with 403 status code
-2023-06-14T09:44:25.814-03:00 TRACE 76975 --- [nio-8080-exec-1] o.s.s.w.header.writers.HstsHeaderWriter  : Not injecting HSTS header since it did not match request to [Is Secure]
-----
+    ** logback.xml
 
-It becomes clear that the CSRF token is missing and that is why the request is being denied.
-
-To configure your application to log all the security events, you can add the following to your application:
-
-====
-.application.properties in Spring Boot
-[source,properties,role="primary"]
-----
-logging.level.org.springframework.security=TRACE
-----
-.logback.xml
-[source,xml,role="secondary"]
-----
-<configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- ... -->
-    </appender>
-    <!-- ... -->
-    <logger name="org.springframework.security" level="trace" additivity="false">
-        <appender-ref ref="Console" />
-    </logger>
-</configuration>
-----
-====
+        <configuration>
+            <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <!-- ... -->
+            </appender>
+            <!-- ... -->
+            <logger name="org.springframework.security" level="trace" additivity="false">
+                <appender-ref ref="Console" />
+            </logger>
+        </configuration>

@@ -41,4 +41,9 @@ public class FirstApplication {
 		return authorities.toString();
 	}
 
+	@GetMapping( "/hello")
+	public String sayHello() {
+		return "Hello";
+	}
+
 }

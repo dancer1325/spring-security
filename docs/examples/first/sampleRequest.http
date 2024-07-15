@@ -3,5 +3,10 @@ GET {{host}}current
 
 ### GET - Authenticated
 GET {{host}}current
-Authorization: Basic username password
-// TODO: Why is it NOT comprehend an authenticated user?
+Authorization: Basic user eb424cd7-5196-4ab0-bfb6-87068026dd5d
+// PASSWORD   is displayed by log at start up
+
+### GET - NOT Authenticated, because it's skipped
+GET {{host}}hello
+//Authorization: Basic user eb424cd7-5196-4ab0-bfb6-87068026dd5d
+// PASSWORD   is displayed by log at start up

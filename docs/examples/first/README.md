@@ -2,10 +2,13 @@
 * Simplest way to indicate a user is authenticated
   * == set directly
 * Way to get current authenticated principal
-* Order of `Filter` | `FilterChain` is important -- TODO: Implement --
+* Order of `Filter` | `FilterChain` is important 
+* Print the security filters list invoked / request
+* Different ways to login
 
 ## How to run locally?
 * `mvn springboot:run`
+  * check the existing filters logged 
 
 ## Notes
 * How to check?
@@ -21,3 +24,6 @@
   * very simple Authentication
 * "sampleRequest.http"
   * sample requests
+  * check by logs, the filters passed in order / request-specific
+* different ways to login
+  * TODO: via 'logback.xml' NOT logged
