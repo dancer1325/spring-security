@@ -1,16 +1,3 @@
-# `FilterChainProxy`
-* contains
-  * SecurityFilters
-  * `SecurityFilterChain` API
-
----
-
-# `SecurityFilterChain`
-* := interface which
-* uses
-  * `FilterChainProxy` used it — to determine — `Filter` instance to be invoked / current request
-        
----
 
 # SecurityFilters
 ## == `Filters` which
