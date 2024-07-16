@@ -235,26 +235,6 @@ class SecurityConfig {
 ----
 ======
 
-The above configuration will result in the following `Filter` ordering:
-
-[cols="1,1", options="header"]
-|====
-| Filter | Added by
-| xref:servlet/exploits/csrf.adoc[CsrfFilter] | `HttpSecurity#csrf`
-| xref:servlet/authentication/passwords/form.adoc#servlet-authentication-form[UsernamePasswordAuthenticationFilter] | `HttpSecurity#formLogin`
-| xref:servlet/authentication/passwords/basic.adoc[BasicAuthenticationFilter] | `HttpSecurity#httpBasic`
-| xref:servlet/authorization/authorize-http-requests.adoc[AuthorizationFilter] | `HttpSecurity#authorizeHttpRequests`
-|====
-
-1. First, the `CsrfFilter` is invoked to protect against xref:servlet/exploits/csrf.adoc[CSRF attacks].
-2. Second, the authentication filters are invoked to authenticate the request.
-3. Third, the `AuthorizationFilter` is invoked to authorize the request.
-
-[NOTE]
-====
-There might be other `Filter` instances that are not listed above.
-If you want to see the list of filters invoked for a particular request, you can <<servlet-print-filters,print them>>.
-====
 
 [[servlet-print-filters]]
 === Printing the Security Filters
