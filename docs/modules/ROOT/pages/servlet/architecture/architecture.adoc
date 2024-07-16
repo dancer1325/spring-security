@@ -70,18 +70,27 @@ fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterCh
 [[servlet-delegatingfilterproxy]]
 == DelegatingFilterProxy
 
-Spring provides a `Filter` implementation named {spring-framework-api-url}org/springframework/web/filter/DelegatingFilterProxy.html[`DelegatingFilterProxy`] that allows bridging between the Servlet container's lifecycle and Spring's `ApplicationContext`.
-The Servlet container allows registering `Filter` instances by using its own standards, but it is not aware of Spring-defined Beans.
-You can register `DelegatingFilterProxy` through the standard Servlet container mechanisms but delegate all the work to a Spring Bean that implements `Filter`.
-
-Here is a picture of how `DelegatingFilterProxy` fits into the <<servlet-filters-review,`Filter` instances and the `FilterChain`>>.
+* := `Filter` implementation /
+    ** provided by Spring
+    ** allows
+        *** Servlet container's lifecycle -- is bridged with -- Spring's `ApplicationContext`
+            **** 👁️ Servlet container -- via its own standards, allows registering -- `Filter` instances 👁️
+                ***** ⚠️ BUT, NOT aware of Spring-defined Beans ⚠️
+        *** -- delaying looking up -- `Filter` bean instances
+            **** ReasonOfTheImportance:
+                ***** 🧠container -- needs, before start up, to register -- `Filter` instances  🧠
+                ***** Spring -- typically, to load the Spring Beans uses -- `ContextLoaderListener`
+                    ****** that's done AFTER the `Filter` instances are registered
+    ** uses
+        *** register `DelegatingFilterProxy` -- through the -- standard Servlet container mechanisms + ALL the work -- is delegated to a -- Spring Bean / implements `Filter`
+    ** _Example:_
+        *** `DelegatingFilterProxy` looks up __Bean Filter~0~__ from the `ApplicationContext`
+        *** once it's found -> `DelegatingFilterProxy` -- invokes -- __Bean Filter~0~__
 
 .DelegatingFilterProxy
 [[servlet-delegatingfilterproxy-figure]]
 image::{figures}/delegatingfilterproxy.png[]
 
-`DelegatingFilterProxy` looks up __Bean Filter~0~__ from the `ApplicationContext` and then invokes __Bean Filter~0~__.
-The following listing shows pseudo code of `DelegatingFilterProxy`:
 
 .`DelegatingFilterProxy` Pseudo Code
 [tabs]
@@ -91,7 +100,9 @@ Java::
 [source,java,role="primary"]
 ----
 public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
-	Filter delegate = getFilterBean(someBeanName); // <1>
+	# Get lazily the Filter / -- was registered as a -- Spring Bean
+    Filter delegate = getFilterBean(someBeanName); // <1>
+    # work -- is delegated to the -- Spring Bean
 	delegate.doFilter(request, response); // <2>
 }
 ----
@@ -101,27 +112,22 @@ Kotlin::
 [source,kotlin,role="secondary"]
 ----
 fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-	val delegate: Filter = getFilterBean(someBeanName) // <1>
+	# Get lazily the Filter / -- was registered as a -- Spring Bean
+    val delegate: Filter = getFilterBean(someBeanName) // <1>
+    # work -- is delegated to the -- Spring Bean
 	delegate.doFilter(request, response) // <2>
 }
 ----
 ======
-<1> Lazily get Filter that was registered as a Spring Bean.
-For the example in <<servlet-delegatingfilterproxy-figure>> `delegate` is an instance of __Bean Filter~0~__.
-<2> Delegate work to the Spring Bean.
 
-Another benefit of `DelegatingFilterProxy` is that it allows delaying looking up `Filter` bean instances.
-This is important because the container needs to register the `Filter` instances before the container can start up.
-However, Spring typically uses a `ContextLoaderListener` to load the Spring Beans, which is not done until after the `Filter` instances need to be registered.
 
 [[servlet-filterchainproxy]]
 == FilterChainProxy
 
-Spring Security's Servlet support is contained within `FilterChainProxy`.
-`FilterChainProxy` is a special `Filter` provided by Spring Security that allows delegating to many `Filter` instances through <<servlet-securityfilterchain,`SecurityFilterChain`>>.
-Since `FilterChainProxy` is a Bean, it is typically wrapped in a <<servlet-delegatingfilterproxy>>.
-
-The following image shows the role of `FilterChainProxy`.
+* := special `Filter`
+    ** -> Bean / wrapped in a <<servlet-delegatingfilterproxy>>
+    ** allows
+        ***  `Filter` instances -- can be delegated through -- <<servlet-securityfilterchain,`SecurityFilterChain`>>
 
 .FilterChainProxy
 [[servlet-filterchainproxy-figure]]
