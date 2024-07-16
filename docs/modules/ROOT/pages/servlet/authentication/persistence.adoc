@@ -210,16 +210,17 @@ To avoid these problems, the `SecurityContextPersistenceFilter` wraps both the `
 [[securitycontextholderfilter]]
 == SecurityContextHolderFilter
 
-The javadoc:org.springframework.security.web.context.SecurityContextHolderFilter[] is responsible for loading the `SecurityContext` between requests using the xref::servlet/authentication/persistence.adoc#securitycontextrepository[`SecurityContextRepository`].
+* Check javadoc:org.springframework.security.web.context.SecurityContextHolderFilter[]
+* allows
+    ** request1's `SecurityContext` -- can be loaded, via the xref::servlet/authentication/persistence.adoc#securitycontextrepository[`SecurityContextRepository`], into -- request2's `SecurityContext`
+        *** steps
+            **** image:{icondir}/number_1.png[]  Before running the rest of the application, `SecurityContextHolderFilter` -- loads the `SecurityContext`, from the `SecurityContextRepository`, into -- `SecurityContextHolder`
+            **** image:{icondir}/number_2.png[] application is ran
 
 image::{figures}/securitycontextholderfilter.png[]
 
-image:{icondir}/number_1.png[] Before running the rest of the application, `SecurityContextHolderFilter` loads the `SecurityContext` from the `SecurityContextRepository` and sets it on the `SecurityContextHolder`.
-
-image:{icondir}/number_2.png[] Next, the application is ran.
-
-Unlike, xref:servlet/authentication/persistence.adoc#securitycontextpersistencefilter[`SecurityContextPersistenceFilter`], `SecurityContextHolderFilter` only loads the `SecurityContext` it does not save the `SecurityContext`.
-This means that when using `SecurityContextHolderFilter`, it is required that the `SecurityContext` is explicitly saved.
-
+* vs xref:servlet/authentication/persistence.adoc#securitycontextpersistencefilter[`SecurityContextPersistenceFilter`]
+    ** ⚠️ `SecurityContextHolderFilter` ONLY loads (NOT save) the `SecurityContext` ⚠️
+        *** -> you need explicitly to save the `SecurityContext`
 
 include::partial$servlet/architecture/security-context-explicit.adoc[]

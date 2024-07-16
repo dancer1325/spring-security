@@ -40,10 +40,10 @@ XML::
 ----
 ======
 
+* `SecurityContextHolderFilter` ONLY loads (NOT save) the `SecurityContext`
+    ** if you want to save it ->  you need explicitly to save -- via the -- securityContextRepository
 
-Upon using the configuration, it is important that any code that sets the `SecurityContextHolder` with a `SecurityContext` also saves the `SecurityContext` to the `SecurityContextRepository` if it should be persisted between requests.
 
-For example, the following code:
 
 .Setting `SecurityContextHolder` with `SecurityContextPersistenceFilter`
 [tabs]
