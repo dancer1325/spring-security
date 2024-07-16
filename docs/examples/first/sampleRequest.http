@@ -3,7 +3,7 @@ GET {{host}}current
 
 ### GET - Authenticated
 GET {{host}}current
-Authorization: Basic user eb424cd7-5196-4ab0-bfb6-87068026dd5d
+Authorization: Basic user 5b36f8d4-4ed5-4c55-aba0-2621d873efe5
 // PASSWORD   is displayed by log at start up
 
 ### GET - NOT Authenticated, because it's skipped
