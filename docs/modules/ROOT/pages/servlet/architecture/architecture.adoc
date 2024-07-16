@@ -237,15 +237,12 @@ class SecurityConfig {
 
 
 [[servlet-print-filters]]
-=== Printing the Security Filters
+=== Printing the Security Filters / request
 
-* print the security `Filters`  list
-    **
-    ** invoked / request
-        *** uses
-            **** check that <<adding-custom-filter,filter you have added>> is in the list of the security filters
-
-at DEBUG level on the application startup
+* / request
+    ** uses
+        *** check the existing security filters / `SecurityFilterChain`
+* | application startup
 
 [source,text,role="terminal"]
 ----
@@ -266,12 +263,6 @@ org.springframework.security.web.authentication.AnonymousAuthenticationFilter@36
 org.springframework.security.web.access.ExceptionTranslationFilter@77681ce4,
 org.springframework.security.web.access.intercept.AuthorizationFilter@169268a7]
 ----
-
-And that will give a pretty good idea of the security filters that are configured for <<servlet-securityfilterchain,each filter chain>>.
-
-But that is not all, you can also configure your application to print the invocation of each individual filter for each request.
-That is helpful to see if the filter you have added is invoked for a particular request or to check where an exception is coming from.
-To do that, you can configure your application to <<servlet-logging,log the security events>>.
 
 * _Example:_ Check 'examples/first'
 
@@ -524,7 +515,7 @@ The javadoc:org.springframework.security.web.savedrequest.RequestCacheAwareFilte
         *** debug your application
             **** Reason: 🧠 by default, Spring Security does NOT add any detail to the response body, about why a request has been rejected 🧠
 * ways to configure it
-    ** .application.properties | Spring Boot
+    ** application.properties | Spring Boot
 
         logging.level.org.springframework.security=TRACE
 
