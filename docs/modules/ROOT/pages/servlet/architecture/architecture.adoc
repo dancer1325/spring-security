@@ -501,11 +501,11 @@ XML::
 ----
 ======
 
-
 [[requestcacheawarefilter]]
 === RequestCacheAwareFilter
 
-The javadoc:org.springframework.security.web.savedrequest.RequestCacheAwareFilter[] uses the <<requestcache,`RequestCache`>> to replay the original request.
+* Check javadoc:org.springframework.security.web.savedrequest.RequestCacheAwareFilter[]
+    ** -- via <<requestcache,`RequestCache`>> -- replay the original request
 
 [[servlet-logging]]
 == Logging
