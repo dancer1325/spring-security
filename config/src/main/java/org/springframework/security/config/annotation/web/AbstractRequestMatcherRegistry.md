@@ -1,0 +1,1 @@
+* == base class / -- allows -- registering `RequestMatcher`S

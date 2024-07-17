@@ -1210,6 +1210,10 @@ public class AuthorizeHttpRequestsConfigurerTests {
 		void rootPost() {
 		}
 
+		@GetMapping("/hello")
+		void getHello() {
+		}
+
 	}
 
 }
