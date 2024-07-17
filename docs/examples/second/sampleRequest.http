@@ -1,0 +1,4 @@
+### GET - Authenticated
+GET {{host}}/hello
+//Authorization: Basic user 567dad0a-352c-4637-82b8-9093584dba9c
+// PASSWORD   is displayed by log at start up

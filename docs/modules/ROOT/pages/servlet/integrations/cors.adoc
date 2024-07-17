@@ -1,13 +1,14 @@
 [[cors]]
 = CORS
 
-Spring Framework provides https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-cors[first class support for CORS].
-CORS must be processed before Spring Security, because the pre-flight request does not contain any cookies (that is, the `JSESSIONID`).
-If the request does not contain any cookies and Spring Security is first, the request determines that the user is not authenticated (since there are no cookies in the request) and rejects it.
-
-The easiest way to ensure that CORS is handled first is to use the `CorsFilter`.
-Users can integrate the `CorsFilter` with Spring Security by providing a `CorsConfigurationSource`.
-For example, the following will integrate CORS support within Spring Security:
+* Spring Framework -- provides -- https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-cors[first class support for CORS]
+* CORS -- must be 👁️ processed -- before Spring Security 👁️
+    ** Reason: 🧠 pre-flight request does NOT contain any cookies (_Example:_ `JSESSIONID`) -> request determines that the user is not authenticated -> rejects it 🧠
+    ** `CorsFilter`
+        *** ⭐ easiest way to ensure that CORS is handled first ⭐
+        *** + Spring Security
+            **** -- via -- `CorsConfigurationSource`
+                ***** Example: Check '/examples/second'
 
 [tabs]
 ======
@@ -40,10 +41,8 @@ fun corsConfigurationSource(): CorsConfigurationSource {
     return source
 }
 ----
-======
-
-The following listing does the same thing in XML:
-
+xml::
++
 [source,xml]
 ----
 <http>
@@ -54,8 +53,12 @@ The following listing does the same thing in XML:
 	...
 </b:bean>
 ----
+======
 
-If you use Spring MVC's CORS support, you can omit specifying the `CorsConfigurationSource` and Spring Security uses the CORS configuration provided to Spring MVC:
+        ** If you use Spring MVC's CORS support ->
+            *** `CorsConfigurationSource` can be omitted
+            *** Spring Security -- uses the -- CORS configuration / -- provided by -- Spring MVC
+            *** Example: Check '/examples/second'
 
 [tabs]
 ======
@@ -98,10 +101,8 @@ open class WebSecurityConfig {
     }
 }
 ----
-======
-
-The following listing does the same thing in XML:
-
+xml::
++
 [source,xml]
 ----
 <http>
@@ -110,9 +111,12 @@ The following listing does the same thing in XML:
 	...
 </http>
 ----
+======
 
-If you have more than one `CorsConfigurationSource` bean, Spring Security won't automatically configure CORS support for you, that is because it cannot decide which one to use.
-If you want to specify different `CorsConfigurationSource` for each `SecurityFilterChain`, you can pass it directly into the `.cors()` DSL.
+* if you have more > 1 `CorsConfigurationSource` bean -> 👁️ Spring Security will NOT automatically configure CORS support for you 👁️
+    ** Reason: 🧠 can NOT decide which one to use 🧠
+    ** -> you need to specify `.cors((cors) -> cors .configurationSource(CorsConfigurationSourceCustomClass()))` / `SecurityFilterChain`
+    ** Example: Check '/examples/second'
 
 [tabs]
 ======
