@@ -121,8 +121,13 @@ Corresponds to the `realmName` property on `BasicAuthenticationEntryPoint`.
 
 [[nsa-http-request-matcher]]
 * **request-matcher**
-Defines the `RequestMatcher` strategy used in the `FilterChainProxy` and the beans created by the `intercept-url` to match incoming requests.
-Options are currently `mvc`, `ant`, `regex` and `ciRegex`, for Spring MVC, ant, regular-expression and case-insensitive regular-expression respectively.
+* == `RequestMatcher` strategy / used | `FilterChainProxy` + beans to match incoming requests / -- created by -- `intercept-url`
+    ** available options
+        *** `mvc` -- for Spring MVC --
+        *** `ant` -- for ant --
+        *** `regex` -- for regular-expression --
+        *** `ciRegex` -- for case-insensitive regular-expression --
+* TODO:
 A separate instance is created for each <<nsa-intercept-url,intercept-url>> element using its <<nsa-intercept-url-pattern,pattern>>, <<nsa-intercept-url-method,method>> and <<nsa-intercept-url-servlet-path,servlet-path>> attributes.
 Ant paths are matched using an `AntPathRequestMatcher`, regular expressions are matched using a `RegexRequestMatcher` and for Spring MVC path matching the `MvcRequestMatcher` is used.
 See the Javadoc for these classes for more details on exactly how the matching is performed.
