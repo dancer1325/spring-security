@@ -30,42 +30,38 @@
 [[anonymous-config]]
 == Configuration
 
-* TODO:
-Anonymous authentication support is provided automatically when you use the HTTP configuration (introduced in Spring Security 3.0).
-You can customize (or disable) it by using the `<anonymous>` element.
-You need not configure the beans described here unless you are using traditional bean configuration.
+* 👁️ if you use the HTTP configuration ( ? introduced in Spring Security 3.0) -> Anonymous Authentication support provided automatically 👁️
+* `<anonymous>`
+    ** := element /
+        *** -- allows -- customizing or disabling it
+* if you are using traditional bean configuration -> You need to configure the beans
+* required classes -- to provide -- anonymous authentication feature
+    ** `AnonymousAuthenticationToken`
+        *** implementation of `Authentication`
+        *** stores the `GrantedAuthority` instances / -- apply to -- the anonymous principal
+    ** `AnonymousAuthenticationProvider`
+        *** chained into the `ProviderManager`
+            **** -> `AnonymousAuthenticationToken` instances are accepted
+        *** if the scenario allows constructing the `Authentication` object (_Example:_ RMI invocation calls) -> you should use a customized `ProviderManager` / omits the anonymous provider -- rather than sharing the one / you use for your HTTP authentication mechanisms --
+        *** _Example:_ `key` is shared with the filter
 
-Three classes work together to provide the anonymous authentication feature.
-`AnonymousAuthenticationToken` is an implementation of `Authentication` and stores the `GrantedAuthority` instances that apply to the anonymous principal.
-There is a corresponding `AnonymousAuthenticationProvider`, which is chained into the `ProviderManager` so that `AnonymousAuthenticationToken` instances are accepted.
-Finally, an `AnonymousAuthenticationFilter` is chained after the normal authentication mechanisms and automatically adds an `AnonymousAuthenticationToken` to the `SecurityContextHolder` if there is no existing `Authentication` held there.
-The filter and authentication provider is defined as follows:
+    <bean id="anonymousAuthenticationProvider" class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+    <property name="key" value="foobar"/>
+    </bean>
 
-[source,xml]
-----
-<bean id="anonymousAuthFilter"
-	class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
-<property name="key" value="foobar"/>
-<property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS"/>
-</bean>
+    ** `AnonymousAuthenticationFilter`
+        *** chained after the normal authentication mechanisms
+        *** if there is NO existing `Authentication` | `SecurityContextHolder` -> adds automatically an `AnonymousAuthenticationToken` | `SecurityContextHolder`
+        *** _Example:_ `key` is shared with the provider
 
-<bean id="anonymousAuthenticationProvider"
-	class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
-<property name="key" value="foobar"/>
-</bean>
-----
+    <bean id="anonymousAuthFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+    <property name="key" value="foobar"/>
+    <property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS"/>
+    </bean>
+
+TODO:
 
 
-
-The `key` is shared between the filter and authentication provider, so that tokens created by the former are accepted by the latter
-
-[NOTE]
-====
-The use of the `key` property should not be regarded as providing any real security here.
-It is merely a book-keeping exercise.
-If you share a `ProviderManager` that contains an `AnonymousAuthenticationProvider` in a scenario where it is possible for an authenticating client to construct the `Authentication` object (such as with RMI invocations), then a malicious client could submit an `AnonymousAuthenticationToken` that it had created itself (with the chosen username and authority list).
-If the `key` is guessable or can be found out, the token would be accepted by the anonymous provider.
-This is not a problem with normal usage. However, if you use RMI, you should use a customized `ProviderManager` that omits the anonymous provider rather than sharing the one you use for your HTTP authentication mechanisms.
 ====
 
 The `userAttribute` is expressed in the form of `usernameInTheAuthenticationToken,grantedAuthority[,grantedAuthority]`.
