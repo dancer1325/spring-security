@@ -13,9 +13,13 @@ public class SecondApplication {
 		SpringApplication.run(SecondApplication.class, args);
 	}
 
-
 	@GetMapping("/hello")
 	public String sayHello() {
 		return "Hello";
+	}
+
+	@GetMapping("/allow1")
+	public String getAllowFirst() {
+		return "allow1";
 	}
 }

@@ -83,7 +83,7 @@ public class SecurityConfig {
     }*/
 
     // 4.
-    @Bean
+    /*@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests().requestMatchers("/**").hasRole("USER").and().formLogin();
         return http.build();
@@ -97,5 +97,17 @@ public class SecurityConfig {
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
+    }*/
+
+    // 5. RequestMatchers / ALL permitted
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        String[] allowedEndpoints = {"/allow1", "/allow2"};
+        return http
+                .cors(Customizer.withDefaults())
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers(allowedEndpoints).permitAll()
+                )
+                .build();
     }
 }

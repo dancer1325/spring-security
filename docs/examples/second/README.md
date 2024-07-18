@@ -21,4 +21,6 @@
 * "SecurityConfig"
   * provide several cases
     * -> comment or uncomment -- based on -- your desired case to test
+* Case 5 - RequestMatchers / ALL permitted
+  * TODO: Why "/allow1" after succeed, triggers "/favicon.ico"
   

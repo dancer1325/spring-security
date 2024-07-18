@@ -19,6 +19,8 @@ package org.springframework.security.config.annotation.web.configurers;
 import java.util.function.Supplier;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -125,6 +127,20 @@ public class AuthorizeHttpRequestsConfigurerTests {
 			.isThrownBy(() -> this.spring.register(AfterAnyRequestConfig.class).autowire())
 			.withMessageContaining("Can't configure mvcMatchers after anyRequest");
 	}
+
+	@Disabled
+	// TODO: Fix it
+	@Test
+	public void getSuceedForValidURLs() throws Exception {
+		this.spring.register(ListOfRequestConfig.class, BasicController.class).autowire();
+		// @formatter:off
+		MockHttpServletRequestBuilder request1 = get("/allow1");
+		MockHttpServletRequestBuilder request2 = get("/allow2");
+		// @formatter:on
+		this.mvc.perform(request1).andExpect(status().isOk());
+		this.mvc.perform(request2).andExpect(status().isOk());
+	}
+
 
 	@Test
 	public void configureMvcMatcherAccessAuthorizationManagerWhenNotNullThenVerifyUse() throws Exception {
@@ -738,6 +754,23 @@ public class AuthorizeHttpRequestsConfigurerTests {
 
 	@Configuration
 	@EnableWebSecurity
+	static class ListOfRequestConfig {
+
+		@Bean
+		SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+			// @formatter:off
+			return http
+					.authorizeHttpRequests((requests) -> requests
+							.requestMatchers("/allow1, /allow2").permitAll()
+					)
+					.build();
+			// @formatter:on
+		}
+
+	}
+
+	@Configuration
+	@EnableWebSecurity
 	static class CustomAuthorizationManagerConfig {
 
 		static AuthorizationManager<RequestAuthorizationContext> authorizationManager;
@@ -1210,8 +1243,12 @@ public class AuthorizeHttpRequestsConfigurerTests {
 		void rootPost() {
 		}
 
-		@GetMapping("/hello")
-		void getHello() {
+		@GetMapping("/allow1")
+		void getAllowFirst() {
+		}
+
+		@GetMapping("/allow2")
+		void getAllowSecond() {
 		}
 
 	}
