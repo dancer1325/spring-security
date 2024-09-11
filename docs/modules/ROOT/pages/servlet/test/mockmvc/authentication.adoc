@@ -1,17 +1,17 @@
 [[test-mockmvc-securitycontextholder]]
 = Running a Test as a User in Spring MVC Test
 
-It is often desirable to run tests as a specific user.
-There are two simple ways to populate the user:
-
-* <<test-mockmvc-securitycontextholder-rpp,Running as a User in Spring MVC Test with RequestPostProcessor>>
-* <<running-as-a-user-in-spring-mvc-test-with-annotations,Running as a User in Spring MVC Test with Annotations>>
+* recommendations
+    ** run tests -- as a -- specific user
+* ways to populate the user
+    ** <<test-mockmvc-securitycontextholder-rpp,Running as a User in Spring MVC Test with RequestPostProcessor>>
+    ** <<running-as-a-user-in-spring-mvc-test-with-annotations,Running as a User in Spring MVC Test with Annotations>>
 
 [[test-mockmvc-securitycontextholder-rpp]]
 == Running as a User in Spring MVC Test with RequestPostProcessor
 
-You have a number of options to associate a user to the current `HttpServletRequest`.
-The following example runs as a user (which does not need to exist) whose username is `user`, whose password is `password`, and whose role is `ROLE_USER`:
+* options to associate a user -- to the -- current `HttpServletRequest`
+* _Example:_ runs as a user / username is `user`, password is `password`, and role is `ROLE_USER`
 
 [tabs]
 ======
@@ -33,21 +33,13 @@ mvc.get("/") {
 ----
 ======
 
-[NOTE]
-====
-The support works by associating the user to the `HttpServletRequest`.
-To associate the request to the `SecurityContextHolder`, you need to ensure that the `SecurityContextPersistenceFilter` is associated with the `MockMvc` instance.
-You can do so in a number of ways:
-
-* Invoking xref:servlet/test/mockmvc/setup.adoc#test-mockmvc-setup[`apply(springSecurity())`]
-* Adding Spring Security's `FilterChainProxy` to `MockMvc`
-* Manually adding `SecurityContextPersistenceFilter` to the `MockMvc` instance may make sense when using `MockMvcBuilders.standaloneSetup`
-====
-
-
-
-You can easily make customizations.
-For example, the following will run as a user (which does not need to exist) with the username "admin", the password "pass", and the roles "ROLE_USER" and "ROLE_ADMIN".
+* if you want to associate the request -- to the -- `SecurityContextHolder` -> needed to ensure that `SecurityContextPersistenceFilter` -- is associated with the -- `MockMvc` instance
+    ** ways to do it
+        *** invoking xref:servlet/test/mockmvc/setup.adoc#test-mockmvc-setup[`apply(springSecurity())`]
+        *** Adding Spring Security's `FilterChainProxy` | `MockMvc`
+        *** if you use using `MockMvcBuilders.standaloneSetup` -> manually add `SecurityContextPersistenceFilter` | `MockMvc` instance
+* more customizations can be added
+    ** _Example:_ runs as a user / username is `user`, password is `password`, and role is `ROLE_USER` and "ROLE_ADMIN".
 
 [tabs]
 ======
@@ -69,6 +61,7 @@ mvc.get("/admin") {
 ----
 ======
 
+* TODO:
 If you have a custom `UserDetails` that you would like to use, you can easily specify that as well.
 For example, the following will use the specified `UserDetails` (which does not need to exist) to run with a `UsernamePasswordAuthenticationToken` that has a principal of the specified `UserDetails`:
 
