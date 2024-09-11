@@ -1,8 +1,9 @@
 [[test-method]]
 = Testing Method Security
 
-This section demonstrates how to use Spring Security's Test support to test method-based security.
-We first introduce a `MessageService` that requires the user to be authenticated to be able to access it:
+* goal
+    ** how to use Spring Security's Test support?
+* _Example:_ `MessageService` / requires the user to be authenticated
 
 [tabs]
 ======
@@ -46,7 +47,15 @@ Hello org.springframework.security.authentication.UsernamePasswordAuthentication
 [[test-method-setup]]
 == Security Test Setup
 
-Before we can use the Spring Security test support, we must perform some setup:
+* set up
+    ** `@ExtendWith(SpringExtension.class)`
+        *** spring-test module -- should create an -- `ApplicationContext`
+            **** check  {spring-framework-reference-url}testing.html#testcontext-junit-jupiter-extension[Spring reference]
+    ** `@ContextConfiguration`
+        *** spring-test -- provides the -- configuration / used to create the `ApplicationContext`
+        *** NO configuration is specified -> default configuration locations
+        *** check {spring-framework-reference-url}testing.html#spring-testing-annotation-contextconfiguration[Spring Reference]
+        *** if you need ONLY Spring Security related support -> can be replaced by `@SecurityTestExecutionListeners`
 
 [tabs]
 ======
@@ -72,20 +81,21 @@ class WithMockUserTests {
 }
 ----
 ======
-<1> `@ExtendWith` instructs the spring-test module that it should create an `ApplicationContext`. For additional information, refer to the {spring-framework-reference-url}testing.html#testcontext-junit-jupiter-extension[Spring reference].
-<2> `@ContextConfiguration` instructs the spring-test the configuration to use to create the `ApplicationContext`. Since no configuration is specified, the default configuration locations will be tried. This is no different than using the existing Spring Test support. For additional information, refer to the {spring-framework-reference-url}testing.html#spring-testing-annotation-contextconfiguration[Spring Reference].
 
-[NOTE]
-====
-Spring Security hooks into Spring Test support through the `WithSecurityContextTestExecutionListener`, which ensures that our tests are run with the correct user.
-It does this by populating the `SecurityContextHolder` prior to running our tests.
-If you use reactive method security, you also need `ReactorContextTestExecutionListener`, which populates `ReactiveSecurityContextHolder`.
-After the test is done, it clears out the `SecurityContextHolder`.
-If you need only Spring Security related support, you can replace `@ContextConfiguration` with `@SecurityTestExecutionListeners`.
-====
+* `WithSecurityContextTestExecutionListener`
+    ** ensures that tests -- run with the -- correct user
+    ** uses
+        *** hook into Spring Security -- with -- Spring Test support
+            **** -- via -- populating the `SecurityContextHolder` | prior to run our tests
+                ***** once test is done -> `SecurityContextHolder` is cleared out
+* `ReactorContextTestExecutionListener`
+    ** needed | reactive method security
+    ** uses
+        *** hook into Spring Security -- with -- Spring Test support
+            **** -- via -- populating `ReactiveSecurityContextHolder`
+                ***** once test is done -> `SecurityContextHolder` is cleared out
 
-Remember, we added the `@PreAuthorize` annotation to our `HelloMessageService`, so it requires an authenticated user to invoke it.
-If we run the tests, we expect the following test will pass:
+* _Example:_ Continuation of previous example / NOT passing an authenticated
 
 [tabs]
 ======
@@ -512,6 +522,7 @@ You can change this to happen during the `TestExecutionListener.beforeTestExecut
 [[test-method-withsecuritycontext]]
 == @WithSecurityContext
 
+* TODO:
 We have seen that `@WithMockUser` is an excellent choice if we do not use a custom `Authentication` principal.
 Next, we discovered that `@WithUserDetails` lets us use a custom `UserDetailsService` to create our `Authentication` principal but requires the user to exist.
 We now see an option that allows the most flexibility.
