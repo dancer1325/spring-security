@@ -123,9 +123,16 @@ fun getMessageUnauthenticated() {
 [[test-method-withmockuser]]
 == @WithMockUser
 
-The question is "How could we most easily run the test as a specific user?"
-The answer is to use `@WithMockUser`.
-The following test will be run as a user with the username "user", the password "password", and the roles "ROLE_USER".
+* 👁️ easily way to run a test -- as a -- specific user 👁️/
+    ** user / does NOT have to exist
+        *** Reason: 🧠 we mock the user object 🧠
+    ** `Authentication` of type `UsernamePasswordAuthenticationToken` is populated | `SecurityContext`
+    ** principal | `Authentication` is Spring Security's `User` object
+    ** 👁️`User` has by default 👁️
+        *** username of `user`
+        *** password of `password`
+        *** role of single `GrantedAuthority` named `ROLE_USER`
+* _Example:_ run as a user / default username "user", default password "password", and the default roles "ROLE_USER"
 
 [tabs]
 ======
@@ -154,18 +161,8 @@ fun getMessageWithMockUser() {
 ----
 ======
 
-Specifically the following is true:
-
-* The user with a username of `user` does not have to exist, since we mock the user object.
-* The `Authentication` that is populated in the `SecurityContext` is of type `UsernamePasswordAuthenticationToken`.
-* The principal on the `Authentication` is Spring Security's `User` object.
-* The `User` has a username of `user`.
-* The `User` has a password of `password`.
-* A single `GrantedAuthority` named `ROLE_USER` is used.
-
-The preceding example is handy, because it lets us use a lot of defaults.
-What if we wanted to run the test with a different username?
-The following test would run with a username of `customUser` (again, the user does not need to actually exist):
+* _Example2:_ run the test / different username
+    ** as before, user does NOT need to actually exist
 
 [tabs]
 ======
@@ -194,8 +191,7 @@ fun getMessageWithMockUserCustomUsername() {
 ----
 ======
 
-We can also easily customize the roles.
-For example, the following test is invoked with a username of `admin` and roles of `ROLE_USER` and `ROLE_ADMIN`.
+* _Example3: run tests / customize the roles
 
 [tabs]
 ======
@@ -224,8 +220,10 @@ fun getMessageWithMockUserCustomUser() {
 ----
 ======
 
-If we do not want the value to automatically be prefixed with `ROLE_` we can use the `authorities` attribute.
-For example, the following test is invoked with a username of `admin` and the `USER` and `ADMIN` authorities.
+* `authorities`
+    ** := attribute / 👁️ remove the automatically prefix of `ROLE_` 👁️
+
+* _Example:_ run tests / authorities `USER` and `ADMIN`
 
 [tabs]
 ======
@@ -254,9 +252,11 @@ fun getMessageWithMockUserCustomUsername() {
 ----
 ======
 
-It can be a bit tedious to place the annotation on every test method.
-Instead, we can place the annotation at the class level. Then every test uses the specified user.
-The following example runs every test with a user whose username is `admin`, whose password is `password`, and who has the `ROLE_USER` and `ROLE_ADMIN` roles:
+* places to locate the annotations
+    ** | method
+    ** | class
+
+* _Example:_ runs ALL test / user whose username is `admin`, whose password is default `password`, and roles `ROLE_USER` and `ROLE_ADMIN`
 
 [tabs]
 ======
@@ -285,6 +285,7 @@ class WithMockUserTests {
 ----
 ======
 
+* TODO:
 If you use JUnit 5's `@Nested` test support, you can also place the annotation on the enclosing class to apply to all nested classes.
 The following example runs every test with a user whose username is `admin`, whose password is `password`, and who has the `ROLE_USER` and `ROLE_ADMIN` roles for both test methods.
 
