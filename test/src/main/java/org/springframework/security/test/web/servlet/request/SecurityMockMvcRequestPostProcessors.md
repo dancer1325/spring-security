@@ -16,4 +16,7 @@
         * manually adding `SecurityContextPersistenceFilter` | `MockMvc` instance
 * `class UserRequestPostProcessor extends SecurityContextRequestPostProcessorSupport`
   * create `UsernamePasswordAuthenticationToken` / principal is `User` / -- is associated to -- `MockHttpServletRequest`
+* `UserRequestPostProcessor password(String){}`
+  * populate the user's password
+    * "password", by default
 * TODO:
