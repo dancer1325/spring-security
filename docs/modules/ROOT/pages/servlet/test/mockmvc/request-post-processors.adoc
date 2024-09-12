@@ -6,7 +6,7 @@
     ** -- provided by -- Spring MVC Test
     ** allows
         *** modifying a request
-    ** Spring Security provides some `RequestPostProcessor` implementations
+    ** some `RequestPostProcessor` implementations built-in by Spring Security
         *** if you want to use it -> statically import
 
 [tabs]
