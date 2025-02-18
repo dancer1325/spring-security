@@ -1,0 +1,1 @@
+* == interface -- for -- symmetric encryption of text strings
