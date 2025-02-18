@@ -2,26 +2,26 @@
 = Spring Security Crypto Module
 
 [[spring-security-crypto-introduction]]
-The Spring Security Crypto module provides support for symmetric encryption, key generation, and password encoding.
-The code is distributed as part of the core module but has no dependencies on any other Spring Security (or Spring) code.
-
+* provides support for
+    ** symmetric encryption,
+    ** key generation,
+    ** password encoding
+* -- distributed as -- part of the core module
 
 [[spring-security-crypto-encryption]]
 == Encryptors
-The javadoc:org.springframework.security.crypto.encrypt.Encryptors[] class provides factory methods for constructing symmetric encryptors.
-This class lets you create javadoc:org.springframework.security.crypto.encrypt.BytesEncryptor[] instances to encrypt data in raw `byte[]` form.
-You can also construct javadoc:org.springframework.security.crypto.encrypt.TextEncryptor[] instances to encrypt text strings.
-Encryptors are thread-safe.
-
-[NOTE]
-====
-Both `BytesEncryptor` and `TextEncryptor` are interfaces. `BytesEncryptor` has multiple implementations.
-====
+* `org.springframework.security.crypto.encrypt.Encryptors`
+    ** 's factory methods -- for -- constructing symmetric encryptors
+    ** lets you create
+        *** `org.springframework.security.crypto.encrypt.BytesEncryptor` / -- encrypt data in -- raw `byte[]` form
+        *** `org.springframework.security.crypto.encrypt.TextEncryptor` / -- encrypt -- text strings
+    ** are thread-safe
 
 [[spring-security-crypto-encryption-bytes]]
 === BytesEncryptor
-You can use the `Encryptors.stronger` factory method to construct a `BytesEncryptor`:
-
+* alternatives
+    ** -- via -- `Encryptors.stronger()`
++
 .BytesEncryptor
 [tabs]
 ======
@@ -40,17 +40,9 @@ Encryptors.stronger("password", "salt")
 ----
 ======
 
-The `stronger` encryption method creates an encryptor by using 256-bit AES encryption with
-Galois Counter Mode (GCM).
-It derives the secret key by using PKCS #5's PBKDF2 (Password-Based Key Derivation Function #2).
-This method requires Java 6.
-The password used to generate the `SecretKey` should be kept in a secure place and should not be shared.
-The salt is used to prevent dictionary attacks against the key in the event that your encrypted data is compromised.
-A 16-byte random initialization vector is also applied so that each encrypted message is unique.
-
-The provided salt should be in hex-encoded String form, be random, and be at least 8 bytes in length.
-You can generate such a salt by using a `KeyGenerator`:
-
+        *** 👀recommended one 👀
+        *** salt -- can be generated, by using a -- `KeyGenerator`:
++
 .Generating a key
 [tabs]
 ======
@@ -69,15 +61,12 @@ val salt = KeyGenerators.string().generateKey() // generates a random 8-byte sal
 ----
 ======
 
-You can also use the `standard` encryption method, which is 256-bit AES in Cipher Block Chaining (CBC) Mode.
-This mode is not https://en.wikipedia.org/wiki/Authenticated_encryption[authenticated] and does not provide any
-guarantees about the authenticity of the data.
-For a more secure alternative, use `Encryptors.stronger`.
+    ** -- via -- `Encryptors.standard()`
 
 [[spring-security-crypto-encryption-text]]
 === TextEncryptor
-You can use the `Encryptors.text` factory method to construct a standard TextEncryptor:
-
+* -- via -- the `Encryptors.text()`
++
 .TextEncryptor
 [tabs]
 ======
@@ -96,19 +85,21 @@ Encryptors.text("password", "salt")
 ----
 ======
 
-A `TextEncryptor` uses a standard `BytesEncryptor` to encrypt text data.
-Encrypted results are returned as hex-encoded strings for easy storage on the filesystem or in a database.
-
 [[spring-security-crypto-keygenerators]]
 == Key Generators
-The javadoc:org.springframework.security.crypto.keygen.KeyGenerators[] class provides a number of convenience factory methods for constructing different types of key generators.
-By using this class, you can create a javadoc:org.springframework.security.crypto.keygen.BytesKeyGenerator[] to generate `byte[]` keys.
-You can also construct a javadoc:org.springframework.security.crypto.keygen.StringKeyGenerator[] to generate string keys.
-`KeyGenerators` is a thread-safe class.
+
+* `org.springframework.security.crypto.keygen.KeyGenerators`
+    ** 's factory methods -- for -- constructing key generators
+    ** let's you create
+        *** `org.springframework.security.crypto.keygen.BytesKeyGenerator` / generate `byte[]` keys
+        *** `org.springframework.security.crypto.keygen.StringKeyGenerator` / generate `string` keys
+    ** thread-safe
 
 === BytesKeyGenerator
-You can use the `KeyGenerators.secureRandom` factory methods to generate a `BytesKeyGenerator` backed by a `SecureRandom` instance:
-
+* -- via -- `KeyGenerators.secureRandom()` factory methods /
+    ** backed by a `SecureRandom` instance
+    ** key length = 8 bytes
++
 .BytesKeyGenerator
 [tabs]
 ======
@@ -129,9 +120,9 @@ val key = generator.generateKey()
 ----
 ======
 
-The default key length is 8 bytes.
-A `KeyGenerators.secureRandom` variant provides control over the key length:
 
+* -- via -- `KeyGenerators.secureRandom(int keyLength)`
++
 .KeyGenerators.secureRandom
 [tabs]
 ======
@@ -150,8 +141,10 @@ KeyGenerators.secureRandom(16)
 ----
 ======
 
-Use the `KeyGenerators.shared` factory method to construct a BytesKeyGenerator that always returns the same key on every invocation:
-
+* -- via -- `KeyGenerators.shared(int keyLength)`
+    /
+    ** 👀SAME key is returned ALWAYS 👀
++
 .KeyGenerators.shared
 [tabs]
 ======
@@ -171,8 +164,10 @@ KeyGenerators.shared(16)
 ======
 
 === StringKeyGenerator
-You can use the `KeyGenerators.string` factory method to construct an 8-byte, `SecureRandom` `KeyGenerator` that hex-encodes each key as a `String`:
-
+* -- via -- `KeyGenerators.string()` /
+    ** construct an 8-byte, `SecureRandom` `KeyGenerator`
+    ** return String / EACH hex-encoded key
++
 .StringKeyGenerator
 [tabs]
 ======
