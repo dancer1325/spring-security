@@ -182,7 +182,7 @@ image::{figures}/multi-securityfilterchain.png[]
     ** check {gh-url}/config/src/main/java/org/springframework/security/config/annotation/web/builders/FilterOrderRegistration.java[`FilterOrderRegistration` code]
         *** _Example:_ ..., authentication `Filter` , ..., authorization`Filter`, ...
 * _Example:_ Check 'examples/first'
-
++
 [tabs]
 ======
 Java::
